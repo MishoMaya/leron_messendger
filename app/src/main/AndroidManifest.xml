@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Wire
+    Copyright (C) 2018 Wire Swiss GmbH
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.waz.zclient"
+          android:sharedUserId="${sharedUserId}"
+          tools:ignore="MissingRegistered"
+    >
+
+    <!-- See if device is connected to a network -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Cache user data -->
+    <!-- File Sharing -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Communicate with backend servers -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Read contacts, needed to populate people picker -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- Needed for audio calls -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Vibrate to notify user -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Needed for taking photos when setting profile image or sending images -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <!-- get phone number for contact matching -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- needed to switch between speaker/earpiece -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!-- Allows showing incoming call when device is sleeping -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- GCM from Localytics TODO still needed? -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"
+        />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false"
+        />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false"
+        />
+
+    <application
+        android:name=".ZApplication"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:icon="${applicationIcon}"
+        android:label="${applicationLabel}"
+        android:theme="@style/Theme.Light"
+        android:vmSafeMode="${applicationVmSafeMode}"
+        tools:replace="android:allowBackup"
+        >
+
+        <!-- main activity -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Light"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            >
+
+            <intent-filter>
+                <data
+                    android:host="password-reset-successful"
+                    android:scheme="wire"
+                    />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.VIEW" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.waz.zclient.calling.CallingActivity"
+            android:excludeFromRecents="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:showOnLockScreen="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Light"
+            android:windowSoftInputMode="stateHidden"
+            />
+
+        <activity
+            android:name="com.waz.zclient.preferences.PreferencesActivity"
+            android:hardwareAccelerated="true"
+            android:theme="@style/Theme.Dark.Preferences"
+            android:launchMode="singleTask"
+            android:label="@string/empty_string"
+            />
+        <activity
+            android:name=".PopupActivity"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:screenOrientation="unspecified"
+            android:theme="@style/Theme.Popup"
+            android:windowSoftInputMode="stateVisible"
+            />
+        <activity
+            android:name=".ShareActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Share"
+            android:windowSoftInputMode="adjustPan"
+        >
+            <intent-filter android:label="@string/app_name">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter android:label="@string/app_name">
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".controllers.notifications.ShareSavedImageActivity" />
+        <activity
+            android:name=".LaunchActivity"
+            android:label="@string/app_name"
+            android:noHistory="true"
+            android:theme="@style/Theme.Light"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <data android:host="email-verified"
+                      android:scheme="wire" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.VIEW" />
+            </intent-filter>
+
+            <intent-filter>
+                <data
+                    android:host="connect"
+                    android:scheme="wire"
+                    />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.VIEW" />
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".appentry.AppEntryActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Dark"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+        </activity>
+
+        <activity
+            android:name=".ForceUpdateActivity"
+            android:noHistory="true"
+            android:theme="@style/Theme.Light"
+            android:launchMode="singleTask">
+        </activity>
+
+        <receiver
+            android:name=".broadcast.ReferralBroadcastReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver"
+            >
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="com.waz.content.WireContentProvider"
+            android:authorities="${applicationId}"
+            android:exported="false"
+            android:grantUriPermissions="true"/>
+
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+        <meta-data android:name="net.hockeyapp.android.appIdentifier" android:value="${hockeyAppKey}" />
+        <!-- Internal features from SE -->
+        <meta-data android:name="INTERNAL" android:value="${internal_features}"/>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBA1m9faI3-P4sP6S9B_JH3XTNIxHBz2Qg"/>
+
+        <meta-data android:name="com.mixpanel.android.MPConfig.MinimumSessionDuration" android:value="2000" />
+    </application>
+
+</manifest>

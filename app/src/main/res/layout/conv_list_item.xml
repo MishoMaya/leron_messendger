@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Wire
+    Copyright (C) 2018 Wire Swiss GmbH
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="@dimen/conversation_list__row__height">
+
+    <com.waz.zclient.pages.main.conversationlist.views.row.MenuIndicatorView
+        android:id="@+id/conversation_menu_indicator"
+        android:layout_width="@dimen/conversation_list__left_icon_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"/>
+
+    <LinearLayout android:id="@+id/conversation_row_container"
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent">
+
+
+        <com.waz.zclient.conversationlist.views.ConversationAvatarView
+            android:id="@+id/conversation_icon"
+            android:layout_width="@dimen/conversation_list__avatar__size"
+            android:layout_height="@dimen/conversation_list__avatar__size"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/wire__padding__regular"
+            android:layout_marginStart="@dimen/wire__padding__regular"
+            />
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_toStartOf="@+id/conversation_badge"
+                android:layout_marginEnd="@dimen/conversation_list__row__side_padding"
+                android:layout_marginStart="@dimen/conversation_list__row__zero"
+                >
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    />
+
+                <com.waz.zclient.ui.text.TypefaceTextView
+                    android:id="@+id/conversation_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="start|center_vertical"
+                    android:maxLines="1"
+                    android:drawablePadding="@dimen/wire__padding__6"
+                    app:w_font="@string/wire__typeface__light"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/wire__text_size__regular"
+                    />
+
+                <com.waz.zclient.ui.text.TypefaceTextView
+                    android:id="@+id/conversation_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="start|top"
+                    android:maxLines="1"
+                    app:w_font="@string/wire__typeface__light"
+                    android:textSize="@dimen/wire__text_size__small"
+                    style="?startUiUserRowSubLabel"
+                    />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    />
+            </LinearLayout>
+
+            <com.waz.zclient.conversationlist.views.ConversationBadge
+                android:id="@+id/conversation_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/conversation_list__badge__height"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/conversation_list__row__side_padding"
+                android:layout_marginStart="@dimen/conversation_list__row__zero"/>
+
+            <View
+                android:id="@+id/conversation_separator"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/white_8"
+                />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+</merge>

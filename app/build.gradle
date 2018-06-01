@@ -1,0 +1,363 @@
+apply plugin: 'com.android.application'
+apply plugin: 'jp.leafytree.android-scala'
+apply plugin: 'android-apt'
+apply plugin: 'hugo'
+apply plugin: 'com.mutualmobile.gradle.plugins.dexinfo'
+apply from: 'config/quality.gradle'
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+android {
+    //Trigger the licenseFormat task at least once in any compile phase
+    applicationVariants.all { variant ->
+        variant.javaCompiler.dependsOn(rootProject.licenseFormat)
+    }
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode System.getenv("BUILD_NUMBER") as Integer ?: 99999
+        versionName rootProject.ext.majorVersion + android.defaultConfig.versionCode
+        applicationId "com.waz.zclient"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    packagingOptions {
+        // Need to exclude all armeabi/mips libs
+        // as not all of our libs support these architectures
+        exclude 'lib/armeabi/libgnustl_shared.so'
+        exclude 'lib/armeabi/libspotify_embedded_shared.so'
+        exclude 'lib/armeabi/libspotify_sdk.so'
+        exclude 'lib/mips/librs.blur.so'
+        exclude 'lib/mips/librs.decode.so'
+        exclude 'lib/mips/librsjni.so'
+        exclude 'lib/mips/libRSSupport.so'
+        exclude 'lib/arm64-v8a/libjnidispatch.so'
+        exclude 'lib/armeabi/libjnidispatch.so'
+        exclude 'lib/mips/libjnidispatch.so'
+        exclude 'lib/mips64/libjnidispatch.so'
+        exclude 'lib/x86_64/libjnidispatch.so'
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            // All the usual Gradle options.
+            testLogging {
+                events "passed", "skipped", "failed", "standardOut", "standardError"
+                outputs.upToDateWhen { false }
+                showStandardStreams = true
+            }
+        }
+    }
+    compileOptions {
+        compileSdkVersion rootProject.ext.compileSdkVersion
+        buildToolsVersion rootProject.ext.buildToolsVersion
+    }
+
+    if (file("signing.gradle").exists()) {
+        apply from: 'signing.gradle'
+    }
+
+    dexOptions {
+        preDexLibraries false
+        javaMaxHeapSize '4g'
+    }
+
+    buildTypes {
+        release {
+            proguardFiles 'proguard-android-optimize-wire.txt', 'proguard-rules.txt'
+            minifyEnabled true
+            multiDexEnabled true
+            shrinkResources true
+            manifestPlaceholders = [applicationVmSafeMode: "false",
+                                    localyticsGcmSenderId: "\\ 826316279849"]
+        }
+
+        debug {
+            // To get debugging properly working again - https://code.google.com/p/android/issues/detail?id=177480
+            testCoverageEnabled = System.getenv("JOB_NAME").equals("full-test-coverage")
+            versionNameSuffix = " " + getDate()
+            multiDexEnabled true
+            manifestPlaceholders = [applicationVmSafeMode: "true",
+                                    localyticsGcmSenderId: "\\ 826316279849"]
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    productFlavors {
+        dev {
+            minSdkVersion 21
+            applicationId "com.waz.zclient.dev"
+            versionName majorVersion + android.defaultConfig.versionCode + "-dev"
+            manifestPlaceholders = [applicationLabel       : "Wire Dev",
+                                    applicationIcon        : "@drawable/ic_launcher_wire_dev",
+                                    sharedUserId           : "",
+                                    internal_features      : "true",
+                                    hockeyAppKey           : getApiKey("hockeyAppKey")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'true'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'true'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            "\"${getApiKey("mixpanelAppTokenInternal")}\""
+        }
+
+        candidate {
+            applicationId "com.wire.candidate"
+            versionName majorVersion + android.defaultConfig.versionCode + "-candidate"
+            manifestPlaceholders = [applicationLabel       : "Wire Candidate",
+                                    applicationIcon        : "@drawable/ic_launcher_wire_candidate",
+                                    sharedUserId           : "",
+                                    internal_features      : "false",
+                                    hockeyAppKey           : getApiKey("hockeyAppKeyCand")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'true'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'true'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            "\"${getApiKey("mixpanelAppTokenInternal")}\""
+        }
+
+        prod {
+            applicationId "com.wire"
+            manifestPlaceholders = [applicationLabel       : "@string/app_name",
+                                    applicationIcon        : "@drawable/ic_launcher_wire",
+                                    sharedUserId           : "com.waz.userid",
+                                    internal_features      : "false",
+                                    hockeyAppKey           : getApiKey("hockeyAppKeyProd")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'false'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'false'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            "\"${getApiKey("mixpanelAppTokenProd")}\""
+        }
+
+        internal {
+            applicationId "com.wire.internal"
+            versionName majorVersion + android.defaultConfig.versionCode + "-internal"
+            manifestPlaceholders = [applicationLabel : "Wire Internal",
+                                    applicationIcon  : "@drawable/ic_launcher_wire_internal",
+                                    sharedUserId     : "",
+                                    internal_features: "true",
+                                    hockeyAppKey     : getApiKey("hockeyAppKeyInternal")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'false'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'true'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            "\"${getApiKey("mixpanelAppTokenInternal")}\""
+        }
+
+        avs {
+            applicationId "com.wire.avs"
+            versionName majorVersion + android.defaultConfig.versionCode + "-avs"
+            manifestPlaceholders = [applicationLabel       : "Wire AVS",
+                                    applicationIcon        : "@drawable/ic_launcher_wire_playground",
+                                    sharedUserId           : "",
+                                    internal_features      : "true",
+                                    hockeyAppKey           : getApiKey("hockeyAppKeyAvs")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'true'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'true'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            'null'
+        }
+
+        qa {
+            minSdkVersion 21
+            applicationId "com.wire.qa"
+            versionName majorVersion + android.defaultConfig.versionCode + "-qa"
+            manifestPlaceholders = [applicationLabel       : "Wire QA",
+                                    applicationIcon        : "@drawable/ic_launcher_wire_qa",
+                                    sharedUserId           : "",
+                                    internal_features      : "true",
+                                    hockeyAppKey           : getApiKey("hockeyAppKeyQa")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'true'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'true'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            "\"${getApiKey("mixpanelAppTokenInternal")}\""
+        }
+
+        experimental {
+            applicationId "com.wire.x"
+            versionName majorVersion + android.defaultConfig.versionCode + "-exp"
+            manifestPlaceholders = [applicationLabel       : "Wire Exp",
+                                    applicationIcon        : "@drawable/ic_launcher_wire_playground",
+                                    sharedUserId           : "",
+                                    internal_features      : "true",
+                                    hockeyAppKey           : getApiKey("hockeyAppKeyExperimental")]
+
+            buildConfigField 'boolean', 'USE_HOCKEY_UPDATE',             'true'
+            buildConfigField 'boolean', 'DEVELOPER_FEATURES_ENABLED',    'true'
+            buildConfigField 'String',  'MIXPANEL_APP_TOKEN',            'null'
+        }
+    }
+
+
+    sourceSets {
+        androidTest {
+            java.srcDirs += ['build/generated/source/apt/androidTest/dev/debug']
+        }
+
+        test {
+            scala.srcDirs += ['src/test/scala']
+        }
+    }
+
+    /* to ignore error where multiple libs have this file */
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+        exclude 'APK_LICENSE.txt'
+        exclude 'LICENSE.txt'
+    }
+}
+
+dexinfo {
+    maxDepth 2
+}
+
+dependencies {
+    compile project(':lintlib')
+    compile project(':macrosupport')
+
+//    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile deps.scala
+    provided deps.scalaReflect
+    compile deps.multidex
+    compile deps.timber
+    compile deps.supportv4
+    compile deps.supportv13
+    compile deps.supportdesign
+    compile deps.appcompatv7
+    compile deps.supportannotations
+    compile deps.recyclerview
+    compile deps.threetenabp
+    compile deps.hockey
+    compile deps.audioNotifications
+    compile deps.mixpanel
+    compile deps.rebound
+    compile deps.preferences
+    compile(deps.supportpreferences) {
+        exclude group: 'com.android.support', module: 'appcompat-v7'
+    }
+
+    //noinspection GradleDynamicVersion
+    compile deps.psBase
+    compile deps.fcm
+    compile deps.psMaps
+    compile deps.psLocation
+    compile deps.cardview
+
+    //Be careful not to include in production!!
+    devCompile          deps.stetho
+    experimentalCompile deps.stetho
+    qaCompile           deps.stetho
+    internalCompile     deps.stetho
+
+    // Test dependencies
+    testCompile deps.junit
+    testCompile(deps.testutils) {
+        exclude module: 'aspectjrt'
+        exclude module: 'isoparser'
+        exclude module: 'zmessaging-android'
+    }
+    testCompile(deps.scalatest) {
+        exclude module: 'scala-library'
+    }
+    testCompile deps.espressoIntents
+    testCompile deps.hamcrestCore
+    testCompile deps.hamcrestLib
+    testCompile deps.hamcrestIntegration
+    testCompile deps.mockitoCore
+    testCompile deps.espresso
+    testCompile deps.supportannotations
+
+    //AndroidTest dependencies
+    androidTestCompile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile deps.junit
+    androidTestCompile deps.espressoIntents
+    androidTestCompile deps.testRunner
+    androidTestCompile deps.testRules
+    androidTestCompile deps.espresso
+    androidTestCompile deps.supportannotations
+    androidTestCompile deps.mockitoCore
+    androidTestCompile deps.dexmaker
+    androidTestCompile deps.dexmakerDx
+    androidTestCompile deps.dexmakerMockito
+
+    //Translations
+    compile deps.translations
+    compile deps.jna
+
+    // TODO  Nasty hack to be able to build add only one wire-core flavor to the build
+    // TODO  (I know, it sucks, will think of a better way to do this, and we need this
+    // TODO   when there are different SE APIs in dev vs internal/prod)
+    boolean internal = true;
+    for (String taskName : gradle.startParameter.taskNames) {
+        if (taskName.contains("Prod") || taskName.contains("Candidate")) {
+            internal = false;
+            break;
+        }
+    }
+
+    // For using local files in app/libs
+    //compile (name:'avs', ext:'aar')
+    //compile (name:'audio-notifications', ext:'aar')
+    //compile (name:'zmessaging-android', ext:'aar')
+
+    compile "$avsGroup:$avsName:${internal ? avsInternalVersion : avsVersion}"
+    compile("com.wire:zmessaging-android:${internal ? zMessagingDevVersion : zMessagingReleaseVersion}") {
+        transitive = true
+    }
+}
+
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = [
+        "-feature",
+        "-Xfuture",
+        "-Xfatal-warnings",
+        "-deprecation",
+        "-Ywarn-unused-import",
+        "-encoding",
+        "UTF-8"]
+}
+
+static def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('MM/dd HH:mm:ss')
+    return formattedDate
+}
+
+def getApiKey(String property) {
+    if (file("$projectDir/api-keys.properties").exists()) {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("$projectDir/api-keys.properties"))
+        return properties.getProperty(property)
+    } else if (property.startsWith("mixpanel")) {
+        return ""
+    } else {
+        return UUID.randomUUID().toString().replaceAll("-", "")
+    }
+}
+
+//add pretty naming to apk filename
+android.applicationVariants.all { variant ->
+    def appName
+    //Check if an applicationName property is supplied; if not use the name of the parent project.
+    if (project.hasProperty("applicationName")) {
+        appName = applicationName
+    } else {
+        appName = "wire"
+    }
+
+    variant.outputs.each { output ->
+        def newApkName
+        newApkName = "${appName}-${output.baseName}-${rootProject.ext.majorVersion}${android.defaultConfig.versionCode}.apk"
+        output.outputFile = new File(output.outputFile.parent, newApkName)
+    }
+}

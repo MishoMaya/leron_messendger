@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Wire
+    Copyright (C) 2018 Wire Swiss GmbH
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             style="?attr/wireBackground"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/t_conversation_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:clickable="true"
+            app:contentInsetStartWithNavigation="0dp"
+            style="?conversationToolbar"
+            >
+
+            <android.support.v7.widget.ActionMenuView
+                android:id="@+id/conversation_left_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:gravity="start|center_vertical"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                >
+
+                <com.waz.zclient.views.e2ee.ShieldView
+                    android:id="@+id/sv__conversation_toolbar__verified_shield"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/wire__otr__shield__small_width"
+                    android:layout_marginEnd="@dimen/wire__padding__8"
+                    app:shieldVerified="true"
+                    />
+
+                <com.waz.zclient.ui.text.TypefaceTextView
+                    android:id="@+id/tv__conversation_toolbar__title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/wire__padding__8"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:background="@null"
+                    style="?conversationToolbar"
+                    />
+
+                <com.waz.zclient.ui.text.GlyphTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/glyph__linedown"
+                    android:textSize="@dimen/wire__icon_button__text_size_half"
+                    android:background="@null"
+                    style="?conversationToolbar"
+                    />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            >
+
+            <com.waz.zclient.messages.MessagesListView
+                android:id="@+id/messages_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:drawSelectorOnTop="false"
+                android:transcriptMode="disabled"
+                android:listSelector="@color/transparent"
+                android:paddingBottom="@dimen/wire__padding__regular"
+                android:clipToPadding="false"
+                />
+
+            <com.waz.zclient.conversation.TypingIndicatorView
+                android:id="@+id/tiv_typing_indicator_view"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/typing_indicator_layout_height"
+                android:layout_gravity="bottom"
+                />
+
+            <FrameLayout
+                android:id="@+id/guests_banner"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/guests_toolbar_height"
+                android:background="@color/banner_grey"
+                android:layout_gravity="top"
+                android:visibility="visible">
+
+                <com.waz.zclient.ui.text.TypefaceTextView
+                    android:id="@+id/guests_banner_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/wire__text_size__smaller"
+                    app:w_font="@string/wire__typeface__medium"
+                    android:text="@string/guests_are_present"/>
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+        <com.waz.zclient.cursor.CursorView
+            android:id="@+id/cv__cursor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.waz.zclient.pages.extendedcursor.ExtendedCursorContainer
+            android:id="@+id/ecc__conversation"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/extend_container_height"
+            android:layout_gravity="bottom"
+            android:visibility="gone"
+        />
+
+    </LinearLayout>
+
+    <com.waz.zclient.conversation.toolbar.AudioMessageRecordingView
+        android:id="@+id/amrv_audio_message_recording"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        />
+
+
+    <FrameLayout
+        android:id="@+id/fl__conversation_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        />
+
+    <com.waz.zclient.views.LoadingIndicatorView
+        android:id="@+id/lbv__conversation__loading_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
+</FrameLayout>
